@@ -1,0 +1,43 @@
+<h1 class="h3 mb-1">Usuarios</h1>
+<p class="text-muted small mb-3">Desactive una cuenta cuando la persona ya no deba entrar (por ejemplo, un anfitrión que deja la empresa) y actívela de nuevo si regresa.</p>
+
+@if (cargando) { <p>Cargando...</p> }
+@if (error) { <div class="alert alert-danger">{{ error }}</div> }
+
+@if (!cargando && usuarios.length) {
+  <div class="card">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead>
+          <tr><th>Nombre</th><th>Correo</th><th>Roles</th><th>Registro</th><th>Estado</th><th class="text-end">Acción</th></tr>
+        </thead>
+        <tbody>
+          @for (u of usuarios; track u.id) {
+            <tr>
+              <td>{{ u.nombre }}</td>
+              <td>{{ u.correo }}</td>
+              <td class="small">{{ u.roles.join(', ') }}</td>
+              <td class="small">{{ u.fechaRegistro | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <span class="badge" [class.text-bg-dark]="u.estado === 'ACTIVA'" [class.text-bg-light]="u.estado !== 'ACTIVA'">
+                  {{ u.estado === 'ACTIVA' ? 'Activa' : u.estado === 'RESTRINGIDA' ? 'Restringida' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="text-end">
+                @if (esPropia(u)) {
+                  <span class="text-muted small">Su cuenta</span>
+                } @else {
+                  <button class="btn btn-sm" type="button" [disabled]="procesando === u.id"
+                          [class.btn-outline-dark]="u.estado === 'ACTIVA'" [class.btn-dark]="u.estado !== 'ACTIVA'"
+                          (click)="cambiarEstado(u)">
+                    {{ procesando === u.id ? 'Cargando...' : u.estado === 'ACTIVA' ? 'Restringir' : 'Reactivar' }}
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}

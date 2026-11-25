@@ -1,0 +1,41 @@
+<div class="escena">
+  <div class="tarjeta">
+    <span class="chip">Bienvenido</span>
+    <h1 class="titulo">Inicia sesión</h1>
+    <p class="subtitulo">Tu próximo destino comienza aquí.</p>
+
+    @if (aviso) { <div class="alert alert-success">{{ aviso }}</div> }
+    @if (error) {
+      <div class="alert alert-danger">
+        {{ error }}
+        @if (cuentaInactiva) {
+          <button class="btn btn-dark btn-sm w-100 mt-2" type="button" (click)="reactivar()" [disabled]="cargando">Reactivar cuenta</button>
+        }
+      </div>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="entrar()">
+      <label class="visually-hidden" for="correo">Correo electrónico</label>
+      <input id="correo" type="email" class="form-control mb-2" formControlName="correo" placeholder="Correo electrónico"
+             [class.is-invalid]="errorDe('correo')">
+      @if (errorDe('correo')) { <small class="error">{{ errorDe('correo') }}</small> }
+
+      <div class="clave">
+        <label class="visually-hidden" for="contrasena">Contraseña</label>
+        <input id="contrasena" [type]="verClave ? 'text' : 'password'" class="form-control" formControlName="contrasena"
+               placeholder="Contraseña" [class.is-invalid]="errorDe('contrasena')">
+        <button class="ver" type="button" (click)="verClave = !verClave"
+                [attr.aria-label]="verClave ? 'Ocultar contraseña' : 'Mostrar contraseña'">{{ verClave ? 'Ocultar' : 'Ver' }}</button>
+      </div>
+      @if (errorDe('contrasena')) { <small class="error">{{ errorDe('contrasena') }}</small> }
+
+      <a routerLink="/recuperar" class="olvido">¿Olvidaste tu contraseña?</a>
+
+      <button class="btn btn-primary w-100 boton" type="submit" [disabled]="form.invalid || cargando">
+        {{ cargando ? 'Cargando...' : 'Iniciar sesión' }}
+      </button>
+    </form>
+
+    <a routerLink="/registro" class="btn btn-outline-dark w-100 boton mt-2">Crear cuenta</a>
+  </div>
+</div>

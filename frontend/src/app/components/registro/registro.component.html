@@ -1,0 +1,78 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <span class="chip">Nuevo en TuHogar</span>
+    <h1 class="h3 mt-3 mb-3">Crear cuenta</h1>
+
+    @if (error) { <div class="alert alert-danger">{{ error }}</div> }
+
+    <form [formGroup]="form" (ngSubmit)="enviar()" class="card card-body">
+      <div class="mb-3">
+        <label class="form-label" for="nombre">Nombre completo</label>
+        <input id="nombre" class="form-control" formControlName="nombre" [class.is-invalid]="errorDe('nombre')">
+        <div class="invalid-feedback">{{ errorDe('nombre') }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="correo">Correo</label>
+        <input id="correo" type="email" class="form-control" formControlName="correo" [class.is-invalid]="errorDe('correo')">
+        <div class="invalid-feedback">{{ errorDe('correo') }}</div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-sm-4 mb-3">
+          <label class="form-label" for="tipoDocumento">Tipo de documento</label>
+          <select id="tipoDocumento" class="form-select" formControlName="tipoDocumento">
+            <option value="CC">Cédula (CC)</option>
+            <option value="CE">Cédula extranjería (CE)</option>
+            <option value="TI">Tarjeta de identidad (TI)</option>
+            <option value="PASAPORTE">Pasaporte</option>
+          </select>
+        </div>
+        <div class="col-12 col-sm-8 mb-3">
+          <label class="form-label" for="numeroDocumento">Número de documento</label>
+          <input id="numeroDocumento" class="form-control" formControlName="numeroDocumento" [class.is-invalid]="errorDe('numeroDocumento')">
+          <div class="invalid-feedback">{{ errorDe('numeroDocumento') }}</div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="contrasena">Contraseña (mínimo 8 caracteres)</label>
+        <input id="contrasena" type="password" class="form-control" formControlName="contrasena" [class.is-invalid]="errorDe('contrasena')">
+        <div class="invalid-feedback">{{ errorDe('contrasena') }}</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label" for="confirmacion">Confirmar contraseña</label>
+        <input id="confirmacion" type="password" class="form-control" formControlName="confirmacion" [class.is-invalid]="errorDe('confirmacion')">
+        <div class="invalid-feedback">{{ errorDe('confirmacion') }}</div>
+      </div>
+
+      <fieldset class="mb-3">
+        <legend class="form-label fs-6">Quiero usar la plataforma como:</legend>
+        <div class="form-check">
+          <input id="huesped" type="checkbox" class="form-check-input" formControlName="huesped">
+          <label class="form-check-label" for="huesped">Huésped (reservar alojamientos)</label>
+        </div>
+        <div class="form-check">
+          <input id="anfitrion" type="checkbox" class="form-check-input" formControlName="anfitrion">
+          <label class="form-check-label" for="anfitrion">Anfitrión (publicar alojamientos)</label>
+        </div>
+        @if (faltaElegirRol() || (form.errors?.['sinRol'] && form.controls.acepta.touched)) { <div class="text-danger small mt-1">Debe elegir al menos un rol</div> }
+      </fieldset>
+
+      <div class="form-check mb-3">
+        <input id="acepta" type="checkbox" class="form-check-input" formControlName="acepta">
+        <label class="form-check-label" for="acepta">Acepto el tratamiento de mis datos personales</label>
+        @if (form.controls.acepta.touched && form.controls.acepta.invalid) {
+          <div class="text-danger small">Debe aceptar el tratamiento de datos</div>
+        }
+      </div>
+
+      <button class="btn btn-primary" type="submit" [disabled]="cargando">
+        {{ cargando ? 'Cargando...' : 'Crear cuenta' }}
+      </button>
+    </form>
+
+    <p class="mt-3 mb-0">¿Ya tiene cuenta? <a routerLink="/login">Iniciar sesión</a></p>
+  </div>
+</div>
