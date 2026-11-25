@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { validarClavesIguales, leerError, obtenerMensajeError, mostrarErrorEnCampo } from '../../models/validaciones';
+import { validarClaveSegura, validarClavesIguales, leerError, obtenerMensajeError, mostrarErrorEnCampo } from '../../models/validaciones';
 import { AuthService } from '../../services/auth.service';
 
 // roles a elegir
@@ -30,7 +30,7 @@ export class RegistroComponent {
       correo: ['', [Validators.required, Validators.email, Validators.maxLength(120)]],
       tipoDocumento: ['CC', Validators.required],
       numeroDocumento: ['', [Validators.required, Validators.maxLength(20)]],
-      contrasena: ['', [Validators.required, Validators.minLength(8)]],
+      contrasena: ['', [Validators.required, Validators.minLength(8), validarClaveSegura]],
       confirmacion: ['', Validators.required],
       huesped: [false],
       anfitrion: [false],

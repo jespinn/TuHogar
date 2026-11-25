@@ -33,7 +33,7 @@
           <div class="invalid-feedback">{{ errorCambio('codigo') }}</div>
         </div>
         <div class="mb-3">
-          <label class="form-label" for="contrasena">Nueva contraseña (mínimo 8 caracteres)</label>
+          <label class="form-label" for="contrasena">Nueva contraseña (mínimo 8 caracteres, con mayúsculas, minúsculas, números y símbolos)</label>
           <input id="contrasena" type="password" class="form-control" formControlName="contrasena" [class.is-invalid]="errorCambio('contrasena')">
           <div class="invalid-feedback">{{ errorCambio('contrasena') }}</div>
         </div>

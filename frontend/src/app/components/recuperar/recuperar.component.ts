@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { validarClavesIguales, leerError, obtenerMensajeError, mostrarErrorEnCampo } from '../../models/validaciones';
+import { validarClaveSegura, validarClavesIguales, leerError, obtenerMensajeError, mostrarErrorEnCampo } from '../../models/validaciones';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -28,7 +28,7 @@ export class RecuperarComponent {
   cambio = this.fb.nonNullable.group(
     {
       codigo: ['', Validators.required],
-      contrasena: ['', [Validators.required, Validators.minLength(8)]],
+      contrasena: ['', [Validators.required, Validators.minLength(8), validarClaveSegura]],
       confirmacion: ['', Validators.required],
     },
     { validators: validarClavesIguales }
