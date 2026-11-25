@@ -44,7 +44,7 @@ class UsuarioControllerTest {
     @Test
     void registroValidoCreaLaCuentaSinExponerContrasena() throws Exception {
         mvc.perform(post("/api/usuarios/registro").contentType(MediaType.APPLICATION_JSON)
-                        .content(registroJson("ctrl1@correo.co", "9001", "Clave1234")))
+                        .content(registroJson("ctrl1@correo.co", "9001", "Clave123!")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.correo").value("ctrl1@correo.co"))
                 .andExpect(jsonPath("$.contrasena").doesNotExist())
@@ -54,10 +54,20 @@ class UsuarioControllerTest {
     @Test
     void registroInvalidoDevuelveErrorConCampo() throws Exception {
         mvc.perform(post("/api/usuarios/registro").contentType(MediaType.APPLICATION_JSON)
-                        .content(registroJson("correo-malo", "9002", "Clave1234")))
+                        .content(registroJson("correo-malo", "9002", "Clave123!")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.codigo").value("VALIDACION"))
                 .andExpect(jsonPath("$.campo").value("correo"));
+    }
+
+    @Test
+    void registroConContrasenaDebilSeRechaza() throws Exception {
+        // solo letras y números: falta el símbolo
+        mvc.perform(post("/api/usuarios/registro").contentType(MediaType.APPLICATION_JSON)
+                        .content(registroJson("debil@correo.co", "9004", "Clave1234")))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.campo").value("contrasena"))
+                .andExpect(jsonPath("$.mensaje").value("La contraseña debe tener mayúsculas, minúsculas, números y símbolos"));
     }
 
     @Test
@@ -73,7 +83,7 @@ class UsuarioControllerTest {
     @Test
     void recuperarContrasenaPermiteEntrarConLaNueva() throws Exception {
         mvc.perform(post("/api/usuarios/registro").contentType(MediaType.APPLICATION_JSON)
-                .content(registroJson("ctrl2@correo.co", "9003", "Clave1234"))).andExpect(status().isCreated());
+                .content(registroJson("ctrl2@correo.co", "9003", "Clave123!"))).andExpect(status().isCreated());
 
         mvc.perform(post("/api/usuarios/recuperar").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"correo\":\"ctrl2@correo.co\"}"))
@@ -83,10 +93,10 @@ class UsuarioControllerTest {
         String codigo = guardados.get(guardados.size() - 1).getCodigo();
 
         mvc.perform(post("/api/usuarios/restablecer").contentType(MediaType.APPLICATION_JSON).content("""
-                {"correo":"ctrl2@correo.co","codigo":"%s","contrasena":"NuevaClave1","confirmacion":"NuevaClave1"}
+                {"correo":"ctrl2@correo.co","codigo":"%s","contrasena":"NuevaClave1!","confirmacion":"NuevaClave1!"}
                 """.formatted(codigo))).andExpect(status().isOk());
 
-        tokenDe("ctrl2@correo.co", "NuevaClave1"); // falla si la nueva contraseña no sirve
+        tokenDe("ctrl2@correo.co", "NuevaClave1!"); // falla si la nueva contraseña no sirve
     }
 
     @Test

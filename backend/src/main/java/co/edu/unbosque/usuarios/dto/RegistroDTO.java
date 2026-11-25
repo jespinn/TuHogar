@@ -21,6 +21,7 @@ public record RegistroDTO(
 
         @NotBlank(message = "La contraseña es obligatoria")
         @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
+        @Pattern(regexp = ReglasClave.PATRON, message = ReglasClave.MENSAJE)
         String contrasena,
 
         @NotBlank(message = "Debe confirmar la contraseña")

@@ -60,7 +60,9 @@ El frontend se levanta igual. Con H2 los datos se reinician cada vez que se apag
 cd backend
 mvn test
 ```
-43 pruebas (usan H2, perfil `demo`): Usuarios 18, Reservas 18 y Reportes 7.
+44 pruebas (usan H2, perfil `demo`): Usuarios 19, Reservas 18 y Reportes 7.
+
+Contraseñas nuevas (registro y recuperación): mínimo 8 caracteres con mayúsculas, minúsculas, números y símbolos, por ejemplo `Clave123!`.
 
 ## Credenciales de prueba
 

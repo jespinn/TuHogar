@@ -13,10 +13,22 @@ export function obtenerMensajeError(form: FormGroup, campo: string): string {
   if (e['maxlength']) return `No puede superar ${e['maxlength'].requiredLength} caracteres`;
   if (e['min']) return `El valor mínimo es ${e['min'].min}`;
   if (e['max']) return `El máximo es ${e['max'].max}`;
+  if (e['claveDebil']) return 'Debe tener mayúsculas, minúsculas, números y símbolos';
   if (e['pattern']) return 'El formato no es válido';
   if (e['servidor']) return e['servidor'];
   if (campo === 'confirmacion' && form.errors?.['noCoinciden']) return 'Las contraseñas no coinciden';
   return '';
+}
+
+/** contraseña segura: mayúscula, minúscula, número y símbolo */
+export function validarClaveSegura(control: AbstractControl): ValidationErrors | null {
+  const clave: string = control.value ?? '';
+  if (!clave) return null; // de vacío se encarga required
+  const tieneMayuscula = /[A-Z]/.test(clave);
+  const tieneMinuscula = /[a-z]/.test(clave);
+  const tieneNumero = /[0-9]/.test(clave);
+  const tieneSimbolo = /[^A-Za-z0-9]/.test(clave);
+  return tieneMayuscula && tieneMinuscula && tieneNumero && tieneSimbolo ? null : { claveDebil: true };
 }
 
 /** contraseñas iguales */

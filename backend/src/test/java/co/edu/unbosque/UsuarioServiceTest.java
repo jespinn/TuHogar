@@ -28,7 +28,7 @@ class UsuarioServiceTest {
     @Autowired PublicacionRepository publicaciones;
 
     private RegistroDTO registrar(String correo, String documento, List<String> roles) {
-        return new RegistroDTO("Nuevo Usuario", correo, "Clave1234", "Clave1234", "CC", documento, roles, true);
+        return new RegistroDTO("Nuevo Usuario", correo, "Clave123!", "Clave123!", "CC", documento, roles, true);
     }
 
     // el código llega al correo; la prueba lo lee de la base
@@ -45,7 +45,7 @@ class UsuarioServiceTest {
         assertEquals(List.of("ANFITRION", "HUESPED"), creado.roles());
         Usuario guardado = usuarios.findByCorreo("nuevo@correo.co").orElseThrow();
         assertTrue(guardado.getContrasenaHash().startsWith("$2")); // BCrypt
-        assertNotEquals("Clave1234", guardado.getContrasenaHash());
+        assertNotEquals("Clave123!", guardado.getContrasenaHash());
     }
 
     @Test
@@ -93,7 +93,7 @@ class UsuarioServiceTest {
     @Test
     void elHuespedDesactivaYReactivaSuCuenta() {
         servicio.registrar(registrar("sinreservas@correo.co", "558", List.of("HUESPED"))); // sin reservas
-        LoginDTO credenciales = new LoginDTO("sinreservas@correo.co", "Clave1234");
+        LoginDTO credenciales = new LoginDTO("sinreservas@correo.co", "Clave123!");
 
         assertEquals("INACTIVA", servicio.desactivarMiCuenta("sinreservas@correo.co").estado());
         ApiException error = assertThrows(ApiException.class, () -> servicio.iniciarSesion(credenciales));
@@ -141,7 +141,7 @@ class UsuarioServiceTest {
         codigos.save(vencido);
 
         ApiException error = assertThrows(ApiException.class, () -> servicio.restablecer(
-                new RestablecerDTO("maria.huesped@correo.co", "111111", "OtraClave99", "OtraClave99")));
+                new RestablecerDTO("maria.huesped@correo.co", "111111", "OtraClave99!", "OtraClave99!")));
         assertEquals("CODIGO_VENCIDO", error.getCodigo());
     }
 
@@ -151,7 +151,7 @@ class UsuarioServiceTest {
         LocalDateTime vence = codigos.findAll().get(0).getExpiraEn();
         assertTrue(vence.isAfter(LocalDateTime.now().plusMinutes(29))); // dura 30 minutos
         assertTrue(vence.isBefore(LocalDateTime.now().plusMinutes(31)));
-        RestablecerDTO cambio = new RestablecerDTO("maria.huesped@correo.co", codigo, "OtraClave99", "OtraClave99");
+        RestablecerDTO cambio = new RestablecerDTO("maria.huesped@correo.co", codigo, "OtraClave99!", "OtraClave99!");
 
         servicio.restablecer(cambio); // primera vez funciona
         ApiException error = assertThrows(ApiException.class, () -> servicio.restablecer(cambio));

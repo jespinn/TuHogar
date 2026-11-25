@@ -36,7 +36,7 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label" for="contrasena">Contraseña (mínimo 8 caracteres)</label>
+        <label class="form-label" for="contrasena">Contraseña (mínimo 8 caracteres, con mayúsculas, minúsculas, números y símbolos)</label>
         <input id="contrasena" type="password" class="form-control" formControlName="contrasena" [class.is-invalid]="errorDe('contrasena')">
         <div class="invalid-feedback">{{ errorDe('contrasena') }}</div>
       </div>
