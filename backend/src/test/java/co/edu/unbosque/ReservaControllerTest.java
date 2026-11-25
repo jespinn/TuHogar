@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import co.edu.unbosque.reservas.repository.ReservaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,11 @@ import org.springframework.test.web.servlet.MockMvc;
 /** solo administrador */
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("demo")
+@ActiveProfiles("test") // base alojamientos_test en PostgreSQL
 class ReservaControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
+    @Autowired ReservaRepository reservas;
 
     private String tokenDe(String correo, String contrasena) throws Exception {
         String cuerpo = "{\"correo\":\"" + correo + "\",\"contrasena\":\"" + contrasena + "\"}";
@@ -64,15 +66,16 @@ class ReservaControllerTest {
 
     @Test
     void elComprobanteSeDescargaEnPdf() throws Exception {
-        // reserva de maría
+        // una reserva de maría (el id depende del orden de carga)
+        Long id = reservas.findByHuespedCorreoOrderByIdDesc("maria.huesped@correo.co").get(0).getId();
         String maria = tokenDe("maria.huesped@correo.co", "Clave1234");
-        mvc.perform(get("/api/reservas/5/comprobante").header("Authorization", "Bearer " + maria))
+        mvc.perform(get("/api/reservas/" + id + "/comprobante").header("Authorization", "Bearer " + maria))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_PDF));
 
         // administrador sin permiso
         String admin = tokenDe("admin@alojamientos.co", "Admin1234");
-        mvc.perform(get("/api/reservas/5/comprobante").header("Authorization", "Bearer " + admin))
+        mvc.perform(get("/api/reservas/" + id + "/comprobante").header("Authorization", "Bearer " + admin))
                 .andExpect(status().isForbidden());
     }
 }
