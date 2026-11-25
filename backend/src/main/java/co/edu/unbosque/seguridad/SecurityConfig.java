@@ -8,9 +8,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
@@ -32,18 +29,6 @@ public class SecurityConfig {
     public SecurityConfig(JwtUtil jwtUtil, ObjectMapper json) {
         this.jwtUtil = jwtUtil;
         this.json = json;
-    }
-
-    /** consola h2 (solo demo) */
-    @Bean
-    @Profile("demo")
-    @Order(1)
-    SecurityFilterChain abrirConsolaH2(HttpSecurity http) throws Exception {
-        http.securityMatcher(PathRequest.toH2Console())
-            .csrf(csrf -> csrf.disable())
-            .headers(h -> h.frameOptions(f -> f.sameOrigin()))
-            .authorizeHttpRequests(r -> r.anyRequest().permitAll());
-        return http.build();
     }
 
     @Bean

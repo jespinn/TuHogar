@@ -19,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@ActiveProfiles("demo")
+@ActiveProfiles("test") // base alojamientos_test en PostgreSQL
 @Transactional // deshace los cambios
 class UsuarioServiceTest {
     @Autowired UsuarioService servicio;

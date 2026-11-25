@@ -17,7 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
-@ActiveProfiles("demo")
+@ActiveProfiles("test") // base alojamientos_test en PostgreSQL
 @Transactional
 class ReservaServiceTest {
     // datos de laureles

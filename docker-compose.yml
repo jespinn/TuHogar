@@ -10,10 +10,12 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - datos:/var/lib/postgresql/data
+      - datos_pg17:/var/lib/postgresql/data
       # scripts iniciales
       - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
       - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+      # base aparte para mvn test
+      - ./backend/src/test/resources/crear-base-pruebas.sql:/docker-entrypoint-initdb.d/03-base-pruebas.sql
 
   backend:
     build: ./backend
@@ -40,4 +42,4 @@ services:
       - "4200:80"
 
 volumes:
-  datos:
+  datos_pg17:

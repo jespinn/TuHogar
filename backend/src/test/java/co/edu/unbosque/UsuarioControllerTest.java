@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("demo")
+@ActiveProfiles("test") // base alojamientos_test en PostgreSQL
 class UsuarioControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper json;
