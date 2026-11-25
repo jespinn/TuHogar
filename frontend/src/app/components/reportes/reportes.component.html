@@ -1,0 +1,159 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <div>
+    <h1 class="h3 mb-0">Panel de indicadores</h1>
+    <span class="text-muted small">Resumen del marketplace y exportación de reportes</span>
+  </div>
+  <div class="card card-body py-2 px-3 d-flex flex-row flex-wrap align-items-center gap-2">
+    <span class="fw-semibold small text-muted">Exportar reporte</span>
+    <select class="form-select form-select-sm w-auto" [(ngModel)]="tipoExportar" aria-label="Tipo de reporte">
+      @for (t of tipos; track t.valor) { <option [value]="t.valor">{{ t.nombre }}</option> }
+    </select>
+    <select class="form-select form-select-sm w-auto" [(ngModel)]="formatoExportar" aria-label="Formato">
+      <option value="PDF">PDF</option>
+      <option value="XLSX">Excel</option>
+    </select>
+    <button class="btn btn-primary btn-sm text-nowrap" type="button" [disabled]="!datos || exportando" (click)="exportar()">
+      {{ exportando ? 'Cargando...' : 'Exportar' }}
+    </button>
+  </div>
+</div>
+
+<div class="card card-body py-2 px-3 mb-3 d-flex flex-row flex-wrap align-items-center gap-2">
+  <span class="fw-semibold small text-muted">Rango de fechas</span>
+  <input type="date" class="form-control form-control-sm w-auto" [(ngModel)]="desde" aria-label="Desde">
+  <span class="small text-muted">a</span>
+  <input type="date" class="form-control form-control-sm w-auto" [(ngModel)]="hasta" aria-label="Hasta">
+  <button class="btn btn-outline-primary btn-sm" type="button" (click)="cargar()">Aplicar</button>
+  <button class="btn btn-link btn-sm" type="button" (click)="limpiarFiltro()">Quitar filtro</button>
+</div>
+
+@if (cargando) { <p>Cargando...</p> }
+@if (error) { <div class="alert alert-danger">{{ error }}</div> }
+@if (datos?.aviso) { <div class="alert alert-warning">{{ datos?.aviso }}</div> }
+
+@if (datos) {
+  <!-- reservas por periodo -->
+  <h2 class="h5 mb-2">Reservas hechas</h2>
+  <div class="row g-3 mb-4">
+    @for (periodo of ['Hoy', 'Últimos 7 días', 'Últimos 30 días']; track periodo) {
+      <div class="col-12 col-md-4">
+        <div class="card indicador indicador-reservas h-100">
+          <div class="card-body">
+            <div class="text-muted small text-uppercase">{{ periodo }}</div>
+            <div class="indicador-valor">{{ datos.reservasRecientes[periodo] }}</div>
+            <div class="small text-muted">{{ datos.reservasRecientes[periodo] === 1 ? 'reserva' : 'reservas' }}</div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- totales generales -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card indicador h-100"><div class="card-body">
+        <div class="text-muted small text-uppercase">Ingresos estimados</div>
+        <div class="indicador-valor fs-4">{{ datos.ingresosEstimados | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</div>
+        <div class="small text-muted">confirmadas y completadas</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card indicador h-100"><div class="card-body">
+        <div class="text-muted small text-uppercase">Reservas en total</div>
+        <div class="indicador-valor">{{ totalReservas }}</div>
+        <div class="small text-muted">todos los estados</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card indicador h-100"><div class="card-body">
+        <div class="text-muted small text-uppercase">Publicaciones activas</div>
+        <div class="indicador-valor">{{ publicacionesActivas }}</div>
+        <div class="small text-muted">visibles para los huéspedes</div>
+      </div></div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card indicador h-100"><div class="card-body">
+        <div class="text-muted small text-uppercase">Usuarios</div>
+        <div class="indicador-valor">{{ totalUsuarios }}</div>
+        <div class="small text-muted">cuentas registradas</div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- gráficos de barras -->
+  <h2 class="h5 mb-2">Reservas y demanda</h2>
+  <div class="row g-3 mb-4">
+    @for (g of graficosReservas; track g.titulo) {
+      <div class="col-12 col-md-6 col-xl-4">
+        <ng-container *ngTemplateOutlet="grafico; context: { $implicit: g }"></ng-container>
+      </div>
+    }
+  </div>
+
+  <h2 class="h5 mb-2">Usuarios y publicaciones</h2>
+  <div class="row g-3 mb-4">
+    @for (g of graficosGenerales; track g.titulo) {
+      <div class="col-12 col-md-6 col-xl-4">
+        <ng-container *ngTemplateOutlet="grafico; context: { $implicit: g }"></ng-container>
+      </div>
+    }
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <div class="card h-100">
+        <div class="card-header fw-semibold">Ingresos por reserva</div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover mb-0">
+            <thead><tr><th>N.º</th><th>Alojamiento</th><th>Fechas</th><th class="text-end">Total</th></tr></thead>
+            <tbody>
+              @for (f of datos.ingresosPorReserva; track f.idReserva) {
+                <tr><td>{{ f.idReserva }}</td><td>{{ f.alojamiento }} ({{ f.ciudad }})</td><td class="text-nowrap">{{ f.llegada }} a {{ f.salida }}</td>
+                  <td class="text-end">{{ f.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+              } @empty {
+                <tr><td colspan="4" class="text-muted">Sin datos</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-5">
+      <div class="card h-100">
+        <div class="card-header fw-semibold">Alojamientos sin reservar</div>
+        <table class="table table-sm table-hover mb-0">
+          <thead><tr><th>Alojamiento</th><th>Ciudad</th></tr></thead>
+          <tbody>
+            @for (a of datos.alojamientosSinReservas; track a.id) {
+              <tr><td>{{ a.titulo }}</td><td>{{ a.ciudad }}</td></tr>
+            } @empty {
+              <tr><td colspan="2" class="text-muted">Todos tienen reservas</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <p class="text-muted small mt-3">"Reservas hechas" cuenta todas las reservas según el día en que se crearon. Reservas por mes, ciudad, tipo, fechas, fines de semana e ingresos cuentan solo reservas confirmadas y completadas. Un usuario con dos roles se cuenta en cada uno.</p>
+}
+
+<!-- plantilla del gráfico -->
+<ng-template #grafico let-g>
+  <div class="card h-100">
+    <div class="card-header fw-semibold">{{ g.titulo }}</div>
+    <div class="card-body">
+      @for (b of g.barras; track b.nombre) {
+        <div class="mb-2">
+          <div class="d-flex justify-content-between small">
+            <span>{{ b.nombre }}</span><span class="fw-semibold">{{ b.valor }}</span>
+          </div>
+          <div class="progress barra" role="progressbar" [attr.aria-label]="b.nombre" [attr.aria-valuenow]="b.valor">
+            <div class="progress-bar" [style.width.%]="b.ancho"></div>
+          </div>
+        </div>
+      } @empty {
+        <span class="text-muted small">Sin datos</span>
+      }
+    </div>
+  </div>
+</ng-template>
