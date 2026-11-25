@@ -1,7 +1,8 @@
-# comandos de docker
+# comandos de docker: docker compose up -d --build
 services:
   db:
     image: postgres:17
+    restart: unless-stopped # vuelve a arrancar si se cae o se reinicia Docker
     environment:
       POSTGRES_DB: alojamientos
       POSTGRES_USER: alojamientos
@@ -16,11 +17,20 @@ services:
       - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/02-data.sql
       # base aparte para mvn test
       - ./backend/src/test/resources/crear-base-pruebas.sql:/docker-entrypoint-initdb.d/03-base-pruebas.sql
+    # lista solo cuando postgres acepta conexiones
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alojamientos -d alojamientos"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
 
   backend:
     build: ./backend
+    restart: unless-stopped
+    # espera a que la base esté lista
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     # claves desde el archivo .env (RNF-13)
     environment:
       DB_URL: jdbc:postgresql://db:5432/alojamientos
@@ -36,6 +46,7 @@ services:
       context: ./frontend
       args:
         CONFIGURACION: development # usa environment.ts (API en localhost:8080)
+    restart: unless-stopped
     depends_on:
       - backend
     ports:
