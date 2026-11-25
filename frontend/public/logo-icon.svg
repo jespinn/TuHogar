@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="TuHogar">
+  <rect width="64" height="64" rx="14" fill="#FFFFFF"/>
+  <!-- techo -->
+  <path d="M10 31 L32 12 L54 31" fill="none" stroke="#0B0B0B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- casa -->
+  <path d="M17 29 V50 H47 V29" fill="none" stroke="#0B0B0B" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- puerta con forma de corazon: el hogar que te recibe -->
+  <path d="M32 46 C24 40.5 24 33.5 28.2 33.5 C30 33.5 31.4 34.6 32 36 C32.6 34.6 34 33.5 35.8 33.5 C40 33.5 40 40.5 32 46 Z" fill="#9A9A9A"/>
+</svg>

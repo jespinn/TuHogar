@@ -1,0 +1,43 @@
+# comandos de docker
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: alojamientos
+      POSTGRES_USER: alojamientos
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env}
+    # puerto 5433
+    ports:
+      - "5433:5432"
+    volumes:
+      - datos:/var/lib/postgresql/data
+      # scripts iniciales
+      - ./backend/src/main/resources/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/02-data.sql
+
+  backend:
+    build: ./backend
+    depends_on:
+      - db
+    # claves desde el archivo .env (RNF-13)
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/alojamientos
+      DB_USER: alojamientos
+      DB_PASSWORD: ${DB_PASSWORD:?Falta DB_PASSWORD en .env}
+      JWT_SECRETO: ${JWT_SECRETO:?Falta JWT_SECRETO en .env}
+      CORS_ORIGENES: http://localhost:4200
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        CONFIGURACION: development # usa environment.ts (API en localhost:8080)
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"
+
+volumes:
+  datos:

@@ -1,0 +1,38 @@
+<nav class="navbar navbar-expand-md navbar-dark bg-tuhogar px-3">
+  <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
+    <img src="logo-icon.svg" alt="" width="32" height="32">
+    <span><span class="marca-tu">Tu</span><span class="marca-hogar">Hogar</span></span>
+  </a>
+  <button class="navbar-toggler" type="button" aria-label="Abrir menú" (click)="abierto = !abierto">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" [class.show]="abierto">
+    <ul class="navbar-nav me-auto" (click)="abierto = false">
+      <!-- buscar alojamientos -->
+      <li class="nav-item"><a class="nav-link" routerLink="/alojamientos" routerLinkActive="active">Buscar alojamientos</a></li>
+      @if (auth.usuario(); as usuario) {
+        <li class="nav-item"><a class="nav-link" routerLink="/perfil" routerLinkActive="active">Mi perfil</a></li>
+        @if (auth.tieneRol('ADMINISTRADOR')) {
+          <li class="nav-item"><a class="nav-link" routerLink="/reportes" routerLinkActive="active">Reportes</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/todas-las-reservas" routerLinkActive="active">Todas las reservas</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/usuarios" routerLinkActive="active">Usuarios</a></li>
+        }
+        @if (auth.tieneRol('HUESPED')) {
+          <li class="nav-item"><a class="nav-link" routerLink="/mis-reservas" routerLinkActive="active">Mis reservas</a></li>
+        }
+        @if (auth.tieneRol('ANFITRION')) {
+          <li class="nav-item"><a class="nav-link" routerLink="/reservas-anfitrion" routerLinkActive="active">Reservas de mis publicaciones</a></li>
+        }
+      } @else {
+        <li class="nav-item"><a class="nav-link" routerLink="/login" routerLinkActive="active">Iniciar sesión</a></li>
+        <li class="nav-item"><a class="nav-link" routerLink="/registro" routerLinkActive="active">Registrarse</a></li>
+      }
+    </ul>
+
+    @if (auth.usuario(); as usuario) {
+      <span class="navbar-text me-md-3">{{ usuario.nombre }}</span>
+      <button class="btn btn-outline-light btn-sm" type="button" (click)="salir()">Salir</button>
+    }
+  </div>
+</nav>
