@@ -1,0 +1,48 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Mi perfil</h1>
+
+    @if (cargando) { <p>Cargando...</p> }
+    @if (error) { <div class="alert alert-danger">{{ error }}</div> }
+    @if (exito) { <div class="alert alert-success">{{ exito }}</div> }
+
+    @if (usuario) {
+      <div class="card card-body mb-3">
+        <p class="mb-1"><strong>Correo:</strong> {{ usuario.correo }}</p>
+        <p class="mb-1"><strong>Roles:</strong> {{ usuario.roles.join(', ') }}</p>
+        <p class="mb-1"><strong>Estado:</strong> {{ usuario.estado }}</p>
+        <p class="mb-0"><strong>Registro:</strong> {{ usuario.fechaRegistro | date: 'dd/MM/yyyy HH:mm' }}</p>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="card card-body mb-3">
+        <div class="mb-3">
+          <label class="form-label" for="nombre">Nombre</label>
+          <input id="nombre" class="form-control" formControlName="nombre" [class.is-invalid]="errorDe('nombre')">
+          <div class="invalid-feedback">{{ errorDe('nombre') }}</div>
+        </div>
+        <div class="row">
+          <div class="col-12 col-sm-4 mb-3">
+            <label class="form-label" for="tipoDocumento">Tipo de documento</label>
+            <select id="tipoDocumento" class="form-select" formControlName="tipoDocumento">
+              <option value="CC">CC</option>
+              <option value="CE">CE</option>
+              <option value="TI">TI</option>
+              <option value="PASAPORTE">Pasaporte</option>
+            </select>
+          </div>
+          <div class="col-12 col-sm-8 mb-3">
+            <label class="form-label" for="numeroDocumento">Número de documento</label>
+            <input id="numeroDocumento" class="form-control" formControlName="numeroDocumento" [class.is-invalid]="errorDe('numeroDocumento')">
+            <div class="invalid-feedback">{{ errorDe('numeroDocumento') }}</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="guardando">
+          {{ guardando ? 'Cargando...' : 'Guardar cambios' }}
+        </button>
+      </form>
+      @if (!esAdministrador()) {
+        <button class="btn btn-outline-dark" type="button" (click)="desactivarCuenta()">Desactivar cuenta</button>
+      }
+    }
+  </div>
+</div>
