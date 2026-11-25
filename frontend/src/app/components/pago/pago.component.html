@@ -1,0 +1,54 @@
+<div class="row justify-content-center">
+  <div class="col-12 col-md-8 col-lg-6">
+    <h1 class="h3 mb-3">Pagar reserva</h1>
+
+    @if (cargando) { <p>Cargando...</p> }
+    @if (error) { <div class="alert alert-danger">{{ error }}</div> }
+
+    @if (!cargando && !reserva && !error) {
+      <div class="alert alert-warning">No se encontró la reserva.</div>
+    }
+    @if (reserva && !reserva.puedePagar) {
+      <div class="alert alert-info">Esta reserva no está pendiente de pago.</div>
+    }
+
+    @if (reserva) {
+      <div class="card card-body mb-3">
+        <p class="mb-1"><strong>{{ reserva.alojamiento }}</strong> · {{ reserva.ciudad }}</p>
+        <p class="mb-1">{{ reserva.llegada }} a {{ reserva.salida }} ({{ reserva.noches }} {{ reserva.noches === 1 ? 'noche' : 'noches' }})</p>
+        <p class="fs-5 fw-bold mb-0">Total: {{ reserva.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</p>
+      </div>
+    }
+
+    @if (reserva?.puedePagar) {
+      <form [formGroup]="form" (ngSubmit)="pagar()" class="card card-body">
+        <p class="text-muted small">
+          Pago simulado: cualquier tarjeta de 16 dígitos se aprueba, salvo las que terminan en 0000 (se rechazan).
+          No se guardan los datos de la tarjeta.
+        </p>
+        <div class="mb-3">
+          <label class="form-label" for="numeroTarjeta">Número de tarjeta (16 dígitos)</label>
+          <input id="numeroTarjeta" class="form-control" inputmode="numeric" maxlength="16" formControlName="numeroTarjeta"
+                 [class.is-invalid]="errorDe('numeroTarjeta')">
+          <div class="invalid-feedback">{{ errorDe('numeroTarjeta') }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="titular">Nombre del titular</label>
+          <input id="titular" class="form-control" formControlName="titular" [class.is-invalid]="errorDe('titular')">
+          <div class="invalid-feedback">{{ errorDe('titular') }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="codigoSeguridad">Código de seguridad</label>
+          <input id="codigoSeguridad" class="form-control" inputmode="numeric" maxlength="4" formControlName="codigoSeguridad"
+                 [class.is-invalid]="errorDe('codigoSeguridad')">
+          <div class="invalid-feedback">{{ errorDe('codigoSeguridad') }}</div>
+        </div>
+        <button class="btn btn-primary" type="submit" [disabled]="form.invalid || pagando">
+          {{ pagando ? 'Cargando...' : 'Pagar' }}
+        </button>
+      </form>
+    }
+
+    <p class="mt-3 mb-0"><a routerLink="/mis-reservas">Ir a mis reservas</a></p>
+  </div>
+</div>

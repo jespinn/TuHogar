@@ -1,0 +1,43 @@
+<h1 class="h3 mb-3">Reservas de mis publicaciones</h1>
+
+@if (cargando) { <p>Cargando...</p> }
+@if (error) { <div class="alert alert-danger">{{ error }}</div> }
+@if (!cargando && !error && !reservas.length) {
+  <div class="alert alert-info">No tiene reservas</div>
+}
+
+<div class="row g-3">
+  @for (r of reservas; track r.id) {
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h2 class="h6">{{ r.alojamiento }} · {{ r.ciudad }}</h2>
+            <span class="badge" [class.text-bg-warning]="r.puedeResponder" [class.text-bg-secondary]="!r.puedeResponder">{{ obtenerTextoEstado(r.estado) }}</span>
+          </div>
+          <p class="mb-1">Huésped: {{ r.huesped }} · {{ r.huespedes }} personas</p>
+          <p class="mb-1">{{ r.llegada }} a {{ r.salida }} · {{ r.noches }} {{ r.noches === 1 ? 'noche' : 'noches' }}</p>
+          <p class="fw-bold mb-1">Total: {{ r.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</p>
+
+          @if (rechazando === r.id) {
+            <div class="mt-2">
+              <label class="form-label" [for]="'motivo-' + r.id">Motivo del rechazo</label>
+              <input class="form-control" [id]="'motivo-' + r.id" [formControl]="motivo" [class.is-invalid]="motivo.touched && motivo.invalid">
+              <div class="invalid-feedback">Indique el motivo (máximo 200 caracteres)</div>
+              <button class="btn btn-danger btn-sm mt-2 me-2" type="button" [disabled]="motivo.invalid || procesando" (click)="confirmarRechazo(r.id)">
+                {{ procesando ? 'Cargando...' : 'Confirmar rechazo' }}
+              </button>
+              <button class="btn btn-link btn-sm mt-2" type="button" (click)="rechazando = null">Volver</button>
+            </div>
+          } @else if (r.puedeResponder) {
+            <div class="mt-2">
+              <button class="btn btn-primary btn-sm me-2" type="button" [disabled]="procesando" (click)="aprobar(r.id)">Aprobar</button>
+              <button class="btn btn-outline-danger btn-sm" type="button" (click)="abrirRechazo(r.id)">Rechazar</button>
+            </div>
+          }
+          <button class="btn btn-outline-secondary btn-sm mt-2" type="button" (click)="descargarComprobante(r.id)">Comprobante PDF</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -1,0 +1,117 @@
+<a routerLink="/alojamientos" class="d-inline-block mb-3">&larr; Volver a buscar alojamientos</a>
+
+@if (cargando) { <p>Cargando...</p> }
+@if (error) { <div class="alert alert-danger">{{ error }}</div> }
+
+@if (alojamiento; as a) {
+  <h1 class="h3">{{ a.titulo }}</h1>
+  <p class="text-muted">{{ a.ciudad }} · {{ a.tipoAlojamiento }} · hasta {{ a.capacidad }} huéspedes · Anfitrión: {{ a.anfitrion }}</p>
+
+  <div class="row g-2 mb-3">
+    @for (url of a.imagenes; track url) {
+      <div class="col-12 col-sm-6"><img [src]="url" class="img-fluid rounded" [alt]="a.titulo"></div>
+    }
+  </div>
+
+  <div class="row g-3">
+    <div class="col-12 col-lg-7">
+      <h2 class="h5">Descripción</h2>
+      <p>{{ a.descripcion }}</p>
+
+      <h2 class="h5">Reglas</h2>
+      <p>{{ a.reglas || 'Sin reglas especiales' }}</p>
+
+      <h2 class="h5">Política de cancelación</h2>
+      <p>{{ obtenerTextoPolitica() }}</p>
+
+      <h2 class="h5">Disponibilidad</h2>
+      <ul class="list-group">
+        @for (d of a.disponibilidad; track d.desde) {
+          <li class="list-group-item">Disponible del <strong>{{ d.desde }}</strong> al <strong>{{ d.hasta }}</strong></li>
+        } @empty {
+          <li class="list-group-item text-muted">Sin fechas disponibles</li>
+        }
+      </ul>
+    </div>
+
+    <div class="col-12 col-lg-5">
+      @if (!auth.tieneRol('HUESPED')) {
+        <div class="card card-body">
+          <p class="fs-4 fw-bold mb-0">{{ a.precioNoche | currency: 'COP' : 'symbol-narrow' : '1.0-0' }} <small class="fs-6 fw-normal">por noche</small></p>
+          <p class="text-muted small">Reserva {{ a.modoReserva === 'INMEDIATA' ? 'inmediata' : 'con aprobación del anfitrión' }}</p>
+          @if (auth.usuario()) {
+            <div class="alert alert-info mb-0">Solo los huéspedes pueden cotizar y reservar.</div>
+          } @else {
+            <div class="alert alert-info mb-2">Para cotizar y reservar inicie sesión como huésped.</div>
+            <a class="btn btn-primary" routerLink="/login">Iniciar sesión</a>
+            <a class="btn btn-link" routerLink="/registro">Crear una cuenta</a>
+          }
+        </div>
+      } @else {
+      <form [formGroup]="form" (ngSubmit)="cotizar()" class="card card-body">
+        <p class="fs-4 fw-bold mb-0">{{ a.precioNoche | currency: 'COP' : 'symbol-narrow' : '1.0-0' }} <small class="fs-6 fw-normal">por noche</small></p>
+        <p class="text-muted small">Reserva {{ a.modoReserva === 'INMEDIATA' ? 'inmediata' : 'con aprobación del anfitrión' }}</p>
+
+        <div class="row g-2">
+          <div class="col-6">
+            <label class="form-label" for="llegada">Llegada</label>
+            <input id="llegada" type="date" class="form-control" formControlName="llegada" [min]="hoy"
+                   [class.is-invalid]="errorDe('llegada') || errorGrupo('llegadaPasada') || errorGrupo('fueraDePeriodo')">
+            <div class="invalid-feedback">
+              {{ errorGrupo('llegadaPasada') ? 'La llegada no puede ser una fecha pasada'
+                 : errorGrupo('fueraDePeriodo') ? 'Esas fechas no están dentro de un periodo disponible' : errorDe('llegada') }}
+            </div>
+          </div>
+          <div class="col-6">
+            <label class="form-label" for="salida">Salida</label>
+            <input id="salida" type="date" class="form-control" formControlName="salida" [min]="hoy"
+                   [class.is-invalid]="errorDe('salida') || errorGrupo('salidaAnterior')">
+            <div class="invalid-feedback">{{ errorGrupo('salidaAnterior') ? 'La salida debe ser posterior a la llegada' : errorDe('salida') }}</div>
+          </div>
+        </div>
+
+        <div class="my-2">
+          <label class="form-label" for="huespedes">Huéspedes (máximo {{ a.capacidad }})</label>
+          <input id="huespedes" type="number" class="form-control" formControlName="huespedes" [class.is-invalid]="errorDe('huespedes')">
+          <div class="invalid-feedback">{{ errorDe('huespedes') }}</div>
+        </div>
+
+        @if (a.servicios.length) {
+          <span class="form-label d-block">Servicios adicionales</span>
+          @for (s of a.servicios; track s.id) {
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" [id]="'serv-' + s.id" (change)="alternarServicio(s.id, $any($event.target).checked)">
+              <label class="form-check-label" [for]="'serv-' + s.id">
+                {{ s.nombre }} ({{ s.costo ? (s.costo | currency: 'COP' : 'symbol-narrow' : '1.0-0') : 'incluido' }})
+              </label>
+            </div>
+          }
+        }
+
+        <button class="btn btn-outline-primary mt-3" type="submit" [disabled]="form.invalid || cotizando">
+          {{ cotizando ? 'Cargando...' : 'Cotizar' }}
+        </button>
+      </form>
+
+      @if (cotizacion; as c) {
+        <div class="card card-body mt-3">
+          <h2 class="h6">Desglose ({{ c.noches }} {{ c.noches === 1 ? 'noche' : 'noches' }})</h2>
+          <table class="table table-sm mb-2">
+            <tbody>
+              <tr><td>Tarifa base</td><td class="text-end">{{ c.tarifaBase | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+              <tr><td>Limpieza</td><td class="text-end">{{ c.cargoLimpieza | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+              <tr><td>Servicios adicionales</td><td class="text-end">{{ c.serviciosAdicionales | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+              <tr><td>Cargo de servicio (10 %)</td><td class="text-end">{{ c.cargoServicio | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+              <tr><td>Descuento (7 noches o más)</td><td class="text-end">- {{ c.descuentos | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+              <tr class="fw-bold"><td>Total</td><td class="text-end">{{ c.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td></tr>
+            </tbody>
+          </table>
+          <button class="btn btn-primary" type="button" [disabled]="reservando" (click)="reservar()">
+            {{ reservando ? 'Cargando...' : 'Reservar' }}
+          </button>
+        </div>
+      }
+      }
+    </div>
+  </div>
+}

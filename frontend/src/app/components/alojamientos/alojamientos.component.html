@@ -1,0 +1,23 @@
+<h1 class="h3 mb-3">Elegir alojamiento</h1>
+
+@if (cargando) { <p>Cargando...</p> }
+@if (error) { <div class="alert alert-danger">{{ error }}</div> }
+@if (!cargando && !error && !lista.length) {
+  <div class="alert alert-info">Por ahora no hay alojamientos disponibles.</div>
+}
+
+<div class="row g-3">
+  @for (a of lista; track a.id) {
+    <div class="col-12 col-sm-6 col-lg-4">
+      <div class="card h-100 tarjeta-publicacion">
+        @if (a.imagenPrincipal) { <img [src]="a.imagenPrincipal" class="card-img-top" [alt]="a.titulo"> }
+        <div class="card-body">
+          <h2 class="h6 card-title">{{ a.titulo }}</h2>
+          <p class="card-text text-muted mb-1">{{ a.ciudad }} · {{ a.tipoAlojamiento }} · hasta {{ a.capacidad }} huéspedes</p>
+          <p class="card-text fw-bold">{{ a.precioNoche | currency: 'COP' : 'symbol-narrow' : '1.0-0' }} <span class="fw-normal">por noche</span></p>
+          <a class="btn btn-outline-primary btn-sm" [routerLink]="['/alojamientos', a.id]">Ver detalle</a>
+        </div>
+      </div>
+    </div>
+  }
+</div>
