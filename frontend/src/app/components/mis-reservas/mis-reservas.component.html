@@ -1,0 +1,54 @@
+<h1 class="h3 mb-3">Mis reservas</h1>
+
+@if (aviso) { <div class="alert alert-success">{{ aviso }}</div> }
+@if (cargando) { <p>Cargando...</p> }
+@if (error) { <div class="alert alert-danger">{{ error }}</div> }
+@if (!cargando && !error && !reservas.length) {
+  <div class="alert alert-info">No tiene reservas. <a routerLink="/alojamientos">Elegir alojamiento</a></div>
+}
+
+<div class="row g-3">
+  @for (r of reservas; track r.id) {
+    <div class="col-12 col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h2 class="h6">{{ r.alojamiento }} · {{ r.ciudad }}</h2>
+            <span class="badge" [class.text-bg-warning]="r.puedePagar" [class.text-bg-secondary]="!r.puedePagar">{{ obtenerTextoEstado(r.estado) }}</span>
+          </div>
+          <p class="mb-1">{{ r.llegada }} a {{ r.salida }} · {{ r.noches }} {{ r.noches === 1 ? 'noche' : 'noches' }} · {{ r.huespedes }} huéspedes</p>
+          <p class="fw-bold mb-1">Total: {{ r.total | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</p>
+          @if (r.referenciaPago) { <p class="small text-muted mb-1">Referencia de pago: {{ r.referenciaPago }}</p> }
+          @if (r.valorDevolucion !== null) {
+            <p class="small mb-1">Devolución: {{ r.valorDevolucion | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</p>
+          }
+
+          @if (cancelando === r.id) {
+            <div class="mt-2">
+              @if (devolucion !== null) {
+                <div class="alert alert-warning py-2">
+                  Si cancela ahora se le devolverán {{ devolucion | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}.
+                </div>
+              }
+              <label class="form-label" [for]="'motivo-' + r.id">Motivo de la cancelación</label>
+              <input class="form-control" [id]="'motivo-' + r.id" [formControl]="motivo" [class.is-invalid]="motivo.touched && motivo.invalid">
+              <div class="invalid-feedback">Indique el motivo (máximo 200 caracteres)</div>
+              <button class="btn btn-danger btn-sm mt-2 me-2" type="button" [disabled]="motivo.invalid || procesando" (click)="confirmarCancelacion(r.id)">
+                {{ procesando ? 'Cargando...' : 'Confirmar cancelación' }}
+              </button>
+              <button class="btn btn-link btn-sm mt-2" type="button" (click)="cancelando = null">Volver</button>
+            </div>
+          } @else {
+            <div class="mt-2">
+              @if (r.puedePagar) { <a class="btn btn-primary btn-sm me-2" [routerLink]="['/reservas', r.id, 'pagar']">Pagar</a> }
+              @if (r.puedeCancelar) {
+                <button class="btn btn-outline-danger btn-sm me-2" type="button" (click)="abrirCancelacion(r.id)">Cancelar</button>
+              }
+              <button class="btn btn-outline-secondary btn-sm" type="button" (click)="descargarComprobante(r.id)">Comprobante PDF</button>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
