@@ -1,0 +1,11 @@
+{
+  "name": "tuhogar-e2e",
+  "private": true,
+  "description": "Pruebas de extremo a extremo (E2E) de TuHogar con Playwright",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.0"
+  }
+}
