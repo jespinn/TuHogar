@@ -2,6 +2,7 @@ TuHogar - Marketplace de alojamientos
 
 Proyecto de Ingeniería de Software I, Universidad El Bosque.
 Módulos: M01 Usuarios, M04 Reservas y M08 Reportes.
+Aplicación desplegada en Render: https://tuhogar-frontend.onrender.com (la primera carga puede tardar cerca de un minuto).
 Backend: Java 17 y Spring Boot 3.5. Frontend: Angular 18. Base de datos: PostgreSQL 17 en Docker.
 
 Requisitos
