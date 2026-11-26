@@ -1,17 +1,78 @@
-<!-- sección principal -->
+<!-- encabezado con buscador -->
 <section class="hero text-white">
-  <div class="hero-contenido">
-    <h1 class="hero-titulo">Encuentra tu próximo hogar</h1>
-    <p class="hero-subtitulo">Reserva alojamientos en las principales ciudades de Colombia, con precios claros y pago seguro.</p>
-    <div class="d-flex flex-wrap gap-2">
-      @if (!auth.usuario() || auth.tieneRol('HUESPED')) {
-        <a class="btn btn-primary btn-lg" routerLink="/alojamientos">Ver alojamientos</a>
-      }
-      @if (!auth.usuario()) {
-        <a class="btn btn-outline-light btn-lg" routerLink="/registro">Crear cuenta</a>
+  <h1 class="hero-titulo">Encuentra tu próximo hogar</h1>
+  <p class="hero-subtitulo">Reserva alojamientos en las principales ciudades de Colombia, con precios claros y pago seguro.</p>
+
+  <form class="buscador" (ngSubmit)="verResultados()">
+    <div class="campo">
+      <label for="buscar-ciudad">Destino</label>
+      <select id="buscar-ciudad" name="ciudad" [(ngModel)]="ciudad">
+        <option value="">Todas las ciudades</option>
+        @for (c of ciudades; track c) { <option [value]="c">{{ c }}</option> }
+      </select>
+    </div>
+    <div class="campo">
+      <label for="buscar-tipo">Tipo</label>
+      <select id="buscar-tipo" name="tipo" [(ngModel)]="tipo">
+        <option value="">Cualquier tipo</option>
+        @for (t of tipos; track t) { <option [value]="t">{{ t }}</option> }
+      </select>
+    </div>
+    <div class="campo campo-corto">
+      <label for="buscar-huespedes">Huéspedes</label>
+      <input id="buscar-huespedes" name="huespedes" type="number" min="1" max="20" [(ngModel)]="huespedes">
+    </div>
+    <button class="btn-buscar" type="submit">Buscar</button>
+  </form>
+</section>
+
+<!-- ciudades rápidas -->
+@if (ciudades.length) {
+  <div class="chips" aria-label="Filtrar por ciudad">
+    @for (c of ciudades; track c) {
+      <button type="button" class="chip" [class.activo]="ciudad === c" (click)="elegirCiudad(c)">{{ c }}</button>
+    }
+    @if (ciudad || tipo || huespedes > 1) {
+      <button type="button" class="chip chip-limpiar" (click)="limpiar()">Quitar filtros</button>
+    }
+  </div>
+}
+
+<!-- alojamientos -->
+<section id="resultados" class="mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-baseline gap-2 mb-3">
+    <h2 class="h4 mb-0">Alojamientos disponibles</h2>
+    @if (!cargando) { <span class="text-muted small">{{ resultados.length }} resultado(s)</span> }
+  </div>
+
+  @if (cargando) {
+    <p class="text-muted">Cargando alojamientos... (la primera vez puede tardar un poco)</p>
+  } @else if (!resultados.length) {
+    <p class="text-muted">No hay alojamientos con esos filtros. <button type="button" class="btn btn-link p-0 align-baseline" (click)="limpiar()">Quitar filtros</button></p>
+  } @else {
+    <div class="row g-4">
+      @for (a of resultados; track a.id) {
+        <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+          <a class="tarjeta" [routerLink]="['/alojamientos', a.id]">
+            @if (a.imagenPrincipal) {
+              <img [src]="a.imagenPrincipal" class="tarjeta-foto" [alt]="a.titulo" (error)="mostrarSinFoto(a)">
+            } @else {
+              <div class="tarjeta-foto sin-foto">{{ a.titulo }}</div>
+            }
+            <div class="tarjeta-texto">
+              <div class="d-flex justify-content-between gap-2">
+                <strong>{{ a.ciudad }}</strong>
+                <span class="text-muted small">{{ a.tipoAlojamiento }}</span>
+              </div>
+              <div class="text-muted small text-truncate">{{ a.titulo }}</div>
+              <div class="text-muted small">Hasta {{ a.capacidad }} huéspedes</div>
+              <div class="mt-1"><strong>{{ a.precioNoche | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</strong> por noche</div>
+            </div>
+          </a>
+        </div>
       }
     </div>
-  </div>
+  }
 </section>
 
 <!-- ventajas -->
@@ -19,49 +80,36 @@
   <div class="col-12 col-md-4">
     <div class="card h-100 card-body ventaja">
       <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 2v3M17 2v3M3 9h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zM9 15l2 2 4-4"/></svg>
-      <h2 class="h5">Reserva fácil</h2>
-      <p class="mb-0 text-muted">Elige el alojamiento, cotiza tus fechas y reserva en pocos pasos.</p>
+      <h2 class="h6">Reserva fácil</h2>
+      <p class="mb-0 text-muted small">Elige el alojamiento, cotiza tus fechas y reserva en pocos pasos.</p>
     </div>
   </div>
   <div class="col-12 col-md-4">
     <div class="card h-100 card-body ventaja">
       <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3zM9 12l2 2 4-4"/></svg>
-      <h2 class="h5">Pago seguro (simulado)</h2>
-      <p class="mb-0 text-muted">Paga con una pasarela simulada; no se guardan los datos de tu tarjeta.</p>
+      <h2 class="h6">Pago seguro (simulado)</h2>
+      <p class="mb-0 text-muted small">Paga con una pasarela simulada; no se guardan los datos de tu tarjeta.</p>
     </div>
   </div>
   <div class="col-12 col-md-4">
     <div class="card h-100 card-body ventaja">
       <svg class="icono" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>
-      <h2 class="h5">Cancelación según la política</h2>
-      <p class="mb-0 text-muted">Cada alojamiento indica cuánto se devuelve según los días de anticipación.</p>
+      <h2 class="h6">Cancelación según la política</h2>
+      <p class="mb-0 text-muted small">Cada alojamiento indica cuánto se devuelve según los días de anticipación.</p>
     </div>
   </div>
 </section>
 
-<!-- alojamientos destacados -->
-@if (destacados.length) {
-  <section class="mb-4">
-    <h2 class="h4 mb-3">Alojamientos destacados</h2>
-    <div class="row g-3">
-      @for (a of destacados; track a.id) {
-        <div class="col-12 col-md-4">
-          <div class="card h-100 tarjeta-publicacion">
-            @if (a.imagenPrincipal) {
-              <img [src]="a.imagenPrincipal" class="card-img-top" [alt]="a.titulo" (error)="mostrarSinFoto(a)">
-            } @else {
-              <div class="sin-foto card-img-top">{{ a.titulo }}</div>
-            }
-            <div class="card-body">
-              <h3 class="h6 card-title">{{ a.titulo }}</h3>
-              <p class="card-text text-muted mb-1">{{ a.ciudad }}</p>
-              <p class="card-text fw-bold">{{ a.precioNoche | currency: 'COP' : 'symbol-narrow' : '1.0-0' }} <span class="fw-normal">por noche</span></p>
-              <a class="btn btn-outline-primary btn-sm" [routerLink]="['/alojamientos', a.id]">Ver detalle</a>
-            </div>
-          </div>
-        </div>
-      }
+<!-- invitación a registrarse -->
+@if (!auth.usuario()) {
+  <section class="invitacion">
+    <div>
+      <h2 class="h5 mb-1">¿Aún no tienes cuenta?</h2>
+      <p class="mb-0 text-muted">Regístrate como huésped para reservar o como anfitrión para publicar.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-primary" routerLink="/registro">Crear cuenta</a>
+      <a class="btn btn-outline-primary" routerLink="/login">Iniciar sesión</a>
     </div>
   </section>
 }
-
