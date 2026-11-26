@@ -1,0 +1,58 @@
+# despliegue en Render (diagrama de despliegue: Render con Docker y PostgreSQL 17)
+databases:
+  - name: tuhogar-db
+    plan: free
+    postgresMajorVersion: "17"
+    databaseName: alojamientos
+    user: alojamientos
+
+services:
+  - type: web
+    name: tuhogar-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/reservas/alojamientos
+    envVars:
+      - key: PORT
+        value: "8080"
+      - key: DB_HOST
+        fromDatabase:
+          name: tuhogar-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: tuhogar-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: tuhogar-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: tuhogar-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: tuhogar-db
+          property: password
+      - key: JWT_SECRETO
+        generateValue: true
+      - key: CORS_ORIGENES
+        value: https://tuhogar-frontend.onrender.com
+      - key: JAVA_TOOL_OPTIONS
+        value: -XX:MaxRAMPercentage=70
+
+  - type: web
+    name: tuhogar-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist/frontend/browser
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
