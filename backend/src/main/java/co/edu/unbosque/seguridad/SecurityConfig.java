@@ -38,6 +38,8 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(rutas -> rutas
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // documentación de la API (Swagger)
+                .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/usuarios/registro", "/api/usuarios/login", "/api/usuarios/recuperar", "/api/usuarios/reactivar",
                         "/api/usuarios/restablecer").permitAll()
                 // cuentas: solo administrador
