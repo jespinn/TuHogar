@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /** completa datos iniciales */
 @Component
+@org.springframework.core.annotation.Order(org.springframework.core.Ordered.LOWEST_PRECEDENCE)
 public class DatosIniciales implements ApplicationRunner {
     private final UsuarioRepository usuarios;
     private final PublicacionRepository publicaciones;
